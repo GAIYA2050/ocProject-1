@@ -32,7 +32,7 @@ public interface AuthUserDao {
 
     public void delete(AuthUser entity);
 
-    public void deleteLogin(AuthUser entity);
+    public void deleteLogic(AuthUser entity);
 
 
 }

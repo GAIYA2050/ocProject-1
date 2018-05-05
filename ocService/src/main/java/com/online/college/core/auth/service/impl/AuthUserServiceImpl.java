@@ -86,6 +86,6 @@ public class AuthUserServiceImpl implements IAuthUserService {
 
     @Override
     public void deleteLogin(AuthUser entity) {
-        authUserDao.deleteLogin(entity);
+        authUserDao.deleteLogic(entity);
     }
 }

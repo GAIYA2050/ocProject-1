@@ -43,16 +43,21 @@ public class PortalController {
     @RequestMapping("/index")
     public ModelAndView index() {
 
+
         ModelAndView mv = new ModelAndView("index");
+
+        //加载轮播
         List<ConstsSiteCarousel> carouselList = siteCarouselService.queryCarousels(4);
         mv.addObject("carouselList", carouselList);
 
+        //课程分类 一级分类
         List<ConstsClassifyVO> classifys = portalBusiness.queryAllClassify();
 
+        //课程推荐
         portalBusiness.prepareRecomdCourses(classifys);
         mv.addObject("classifys", classifys);
 
-
+        //获取5门实战课程
         CourseQueryDto queryEntity = new CourseQueryDto();
         queryEntity.setCount(5);
         queryEntity.setFree(CourseEnum.FREE_NOT.value());
@@ -60,11 +65,12 @@ public class PortalController {
         List<Course> actionCourseList = this.courseService.queryList(queryEntity);
         mv.addObject("actionCourseList", actionCourseList);
 
+        //获取5门免费课程
         queryEntity.setFree(CourseEnum.FREE.value());
         List<Course> freeCourseList = this.courseService.queryList(queryEntity);
         mv.addObject("freeCourseList", freeCourseList);
 
-
+        //获取7门java课程 根据学习人数
         queryEntity.setCount(7);
         queryEntity.setFree(null);
         queryEntity.setSubClassify("java");
@@ -72,6 +78,8 @@ public class PortalController {
         List<Course> javaCourseList = this.courseService.queryList(queryEntity);
         mv.addObject("javaCourseList", javaCourseList);
 
+
+        //加载讲师
         List<AuthUser> recomdTeacherList = authUserService.queryRecomd();
         mv.addObject("recomdTeacherList", recomdTeacherList);
 

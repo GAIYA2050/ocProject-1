@@ -39,7 +39,9 @@ public class PortalBusinessImpl implements IPortalBusiness {
         }
         return resultList;
     }
-
+    /*
+     获取所有分类
+     */
     @Override
     public Map<String, ConstsClassifyVO> queryAllClassifyMap() {
         Map<String, ConstsClassifyVO> resultMap = new LinkedHashMap<String, ConstsClassifyVO>();
@@ -53,7 +55,7 @@ public class PortalBusinessImpl implements IPortalBusiness {
                 resultMap.put(vo.getCode(), vo);
             } else {
                 if (null != resultMap.get(c.getParentCode())) {
-                    resultMap.get(c.getParentCode()).getSubClassifyList();
+                    resultMap.get(c.getParentCode()).getSubClassifyList().add(c);
                 }
             }
         }

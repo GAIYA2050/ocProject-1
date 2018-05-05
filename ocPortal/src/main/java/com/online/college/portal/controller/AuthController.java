@@ -89,8 +89,8 @@ public class AuthController {
         }
     }
 
-    @RequestMapping(value = "/dologin")
-    public ModelAndView dologin(AuthUser user,String identiryCode,HttpServletRequest request){
+    @RequestMapping(value = "/doLogin")
+    public ModelAndView doLogin(AuthUser user,String identiryCode,HttpServletRequest request){
         if (SessionContext.getAuthUser() != null){
             return new ModelAndView("redirect:/user/home.html");
         }
