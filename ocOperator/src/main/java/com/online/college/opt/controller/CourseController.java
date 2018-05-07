@@ -1,9 +1,11 @@
 package com.online.college.opt.controller;
 
 import com.online.college.common.page.TailPage;
+import com.online.college.common.storage.QiniuStorage;
 import com.online.college.common.util.CalendarUtil;
 import com.online.college.common.util.JsonUtil;
 import com.online.college.common.web.JsonView;
+import com.online.college.core.auth.domain.AuthUser;
 import com.online.college.core.auth.service.IAuthUserService;
 import com.online.college.core.consts.domain.ConstsClassify;
 import com.online.college.core.consts.service.IConstsClassifyService;
@@ -21,7 +23,9 @@ import org.apache.poi.hssf.record.ColumnInfoRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
@@ -73,14 +77,14 @@ public class CourseController {
 
     @RequestMapping("/doSale")
     @ResponseBody
-    public String doSale(Course entity){
+    public String doSale(Course entity) {
         courseService.updateSelectivity(entity);
         return new JsonView().toString();
     }
 
     @RequestMapping("/doDelete")
     @ResponseBody
-    public String doDelete(Course entity){
+    public String doDelete(Course entity) {
         courseService.delete(entity);
         return new JsonView().toString();
     }
@@ -88,58 +92,142 @@ public class CourseController {
 
     @RequestMapping("/getById")
     @ResponseBody
-    public String getById(Long id){
+    public String getById(Long id) {
         return JsonView.render(courseService.getById(id));
     }
 
 
     @RequestMapping("/read")
-    public ModelAndView courseRead(Long id){
+    public ModelAndView courseRead(Long id) {
         Course course = courseService.getById(id);
-        if (course == null){
+        if (course == null) {
             return new ModelAndView("error/404");
 
         }
         ModelAndView mv = new ModelAndView("cms/course/read");
-        mv.addObject("curNav","course");
-        mv.addObject("course",course);
+        mv.addObject("curNav", "course");
+        mv.addObject("course", course);
 
         List<CourseSectionVO> chaptSections = this.portalBusiness.queryCourseSection(id);
 
-        mv.addObject("chaptSections",chaptSections);
+        mv.addObject("chaptSections", chaptSections);
 
 
-        Map<String ,ConstsClassifyVO> classifyMap = portalBusiness.queryAllClassifyMap();
+        Map<String, ConstsClassifyVO> classifyMap = portalBusiness.queryAllClassifyMap();
         List<ConstsClassifyVO> classifysList = new ArrayList<>();
         for (ConstsClassifyVO vo :
                 classifyMap.values()) {
             classifysList.add(vo);
         }
-        mv.addObject("classifys",classifysList);
-        
-        
+        mv.addObject("classifys", classifysList);
+
+
         List<ConstsClassify> subClassifys = new ArrayList<>();
         for (ConstsClassifyVO vo :
                 classifyMap.values()) {
             subClassifys.addAll(vo.getSubClassifyList());
         }
-        mv.addObject("subClassifys",subClassifys);
+        mv.addObject("subClassifys", subClassifys);
 
 
         CourseStudyStaticsDto staticsDto = new CourseStudyStaticsDto();
         staticsDto.setCourseId(course.getId());
         staticsDto.setEndDate(new Date());
-        staticsDto.setStartDate(CalendarUtil.getPreNDay(new Date(),7));
+        staticsDto.setStartDate(CalendarUtil.getPreNDay(new Date(), 7));
 
         StaticsVO staticsVo = staticsService.queryCourseStudyStatistics(staticsDto);
 
-        if (null != staticsVo){
+        if (null != staticsVo) {
             try {
                 mv.addObject("staticsVo", JsonUtil.toJson(staticsVo));
-            }catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        return mv;
+    }
+
+    @RequestMapping("/doMerge")
+    @ResponseBody
+    public String doMerge(Course entity, @RequestParam MultipartFile pictureImg) {
+        String key = null;
+        try {
+            if (null != pictureImg && pictureImg.getBytes().length > 0) {
+                key = QiniuStorage.uploadImage(pictureImg.getBytes());
+                entity.setPicture(key);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        if (StringUtils.isNotEmpty(entity.getUsername())) {
+            AuthUser user = authUserService.getByUsername(entity.getUsername());
+            if (null == user) {
+                return JsonView.render(1).toString();
+            }
+        } else {
+            return JsonView.render(1).toString();
+        }
+
+        if (null != entity.getId()) {
+            courseService.updateSelectivity(entity);
+        } else {
+            if (StringUtils.isNotEmpty(entity.getClassify())) {
+                ConstsClassify classify = this.constsClassifyService.getByCode(entity.getClassify());
+                if (null != classify) {
+                    entity.setClassifyName(classify.getName());
+                }
+            }
+            if (StringUtils.isNotEmpty(entity.getSubClassify())) {
+                ConstsClassify subClassify = this.constsClassifyService.getByCode(entity.getSubClassify());
+                if (null != subClassify) {
+                    entity.setSubClassifyName(subClassify.getName());
+                }
+            }
+            courseService.createSelectivity(entity);
+        }
+        return JsonView.render(entity).toString();
+    }
+
+
+    @RequestMapping("/add")
+    public ModelAndView add() {
+        ModelAndView mv = new ModelAndView("cms/course/add");
+        mv.addObject("curNav", "course");
+        Map<String, ConstsClassifyVO> classifyMap = portalBusiness.queryAllClassifyMap();
+
+        List<ConstsClassifyVO> classifysList = new ArrayList<>();
+        for (ConstsClassifyVO vo :
+                classifyMap.values()) {
+            classifysList.add(vo);
+        }
+        mv.addObject("classifys", classifysList);
+
+        List<ConstsClassify> subClassifys = new ArrayList<>();
+        for (ConstsClassifyVO vo :
+                classifyMap.values()) {
+            subClassifys.addAll(vo.getSubClassifyList());
+        }
+        mv.addObject("subClassifys", subClassifys);
+        return mv;
+    }
+
+
+    @RequestMapping("/append")
+    public ModelAndView appendSection(Long courseId) {
+        Course course = courseService.getById(courseId);
+        if (null == course) {
+            return new ModelAndView("error/404");
+        }
+        ModelAndView mv = new ModelAndView("cms/course/append");
+        mv.addObject("curNav", "course");
+        mv.addObject("course", course);
+
+        List<CourseSectionVO> chaptSections = this.portalBusiness.queryCourseSection(courseId);
+
+        mv.addObject("chaptSections", chaptSections);
+
         return mv;
     }
 }
