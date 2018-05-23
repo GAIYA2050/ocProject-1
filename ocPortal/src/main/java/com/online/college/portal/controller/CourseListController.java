@@ -18,7 +18,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by RookieWangZhiWei on 2018/5/5.
+ *
+ * @author RookieWangZhiWei
+ * @date 2018/5/23
  */
 @Controller
 @RequestMapping("/course")
@@ -34,69 +36,72 @@ public class CourseListController {
     private ICourseService courseService;
 
 
-    @RequestMapping("/list")
-    public ModelAndView list(String c, String sort, TailPage<Course> page) {
-
+    @RequestMapping(value = "/list")
+    public ModelAndView list(String c, String sort, TailPage<Course> page){
         ModelAndView mv = new ModelAndView("list");
         String curCode = "-1";
         String curSubCode = "-2";
 
-        Map<String, ConstsClassifyVO> classifyMap = portalBusiness.queryAllClassifyMap();
 
-        List<ConstsClassifyVO> classifysList = new ArrayList<ConstsClassifyVO>();
+        Map<String,ConstsClassifyVO> classifyMap = portalBusiness.queryAllClassifyMap();
 
-        for (ConstsClassifyVO vo :
-                classifyMap.values()) {
+        List<ConstsClassifyVO> classifysList = new ArrayList<>();
+
+        for (ConstsClassifyVO vo:
+             classifyMap.values()) {
             classifysList.add(vo);
         }
+        mv.addObject("classifys",classifysList);
 
-        mv.addObject("classifys", classifysList);
+        ConstsClassify curClassify =   constsClassifyService.getByCode(c);
 
-        ConstsClassify curClassify = constsClassifyService.getByCode(c);
-
-        if (null == curClassify) {
+        if(null == curClassify){
             List<ConstsClassify> subClassifys = new ArrayList<ConstsClassify>();
-            for (ConstsClassifyVO vo :
-                    classifyMap.values()) {
+            for(ConstsClassifyVO vo : classifyMap.values()){
                 subClassifys.addAll(vo.getSubClassifyList());
             }
             mv.addObject("subClassifys", subClassifys);
-
-        } else {
-            if (!"0".endsWith(curClassify.getParentCode())) {
+        }else{
+            if(!"0".endsWith(curClassify.getParentCode())){
                 curSubCode = curClassify.getCode();
                 curCode = curClassify.getParentCode();
                 mv.addObject("subClassifys", classifyMap.get(curClassify.getParentCode()).getSubClassifyList());
-            } else {
+            }else{
                 curCode = curClassify.getCode();
                 mv.addObject("subClassifys", classifyMap.get(curClassify.getCode()).getSubClassifyList());
             }
         }
-        mv.addObject("curCode", curCode);
-        mv.addObject("curSubCode", curSubCode);
+
+        mv.addObject("curCode",curCode);
+        mv.addObject("curSubCode",curSubCode);
+
 
         Course queryEntity = new Course();
-        if (!"-1".equals(curCode)) {
+        if (!"-1".equals(curCode)){
             queryEntity.setClassify(curCode);
         }
-        if (!"-2".equals(curSubCode)) {
+        if (!"-2".equals(curSubCode)){
             queryEntity.setSubClassify(curSubCode);
         }
 
 
-        if ("pop".equals(sort)) {
-            page.descSortField("studyCount");
-        } else {
-            sort = "last";
 
-            page.setSortField("id");
+        if ("pop".equals(sort)){
+            page.descSortField("studyCount");
+        }else{
+            sort = "last";
+            page.descSortField("id");
         }
-        mv.addObject("sort", sort);
+
+        mv.addObject("sort",sort) ;
 
 
         queryEntity.setOnsale(CourseEnum.ONSALE.value());
-        page = this.courseService.queryPage(queryEntity, page);
-        mv.addObject("page", page);
+        page = this.courseService.queryPage(queryEntity,page);
+        mv.addObject("page",page);
+
         return mv;
+
     }
+
 }

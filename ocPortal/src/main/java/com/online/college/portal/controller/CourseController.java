@@ -18,7 +18,6 @@ import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -28,20 +27,23 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by RookieWangZhiWei on 2018/5/5.
+ *
+ * @author RookieWangZhiWei
+ * @date 2018/5/23
  */
 @Controller
 @RequestMapping("/course")
 public class CourseController {
 
+
+    @Autowired
+    private ICourseBusiness courseBusiness;
     @Autowired
     private ICourseService courseService;
 
     @Autowired
-    private ICourseBusiness courseBusiness;
-
-    @Autowired
     private IAuthUserService authUserService;
+
 
     @Autowired
     private ICourseSectionService courseSectionService;
@@ -50,102 +52,117 @@ public class CourseController {
     private IUserCourseSectionService userCourseSectionService;
 
 
-    @RequestMapping("/learn/{courseId}")
-    public ModelAndView learn(@PathVariable Long courseId) {
-        if (null == courseId) {
+
+    @RequestMapping(value = "/learn/{courseId}")
+    public ModelAndView learn(@PathVariable Long courseId){
+        if (null == courseId){
             return new ModelAndView("error/404");
         }
 
-        Course course = courseService.getById(courseId);
-        if (null == course) {
+        Course course =courseService.getById(courseId);
+
+        if (null == course){
             return new ModelAndView("error/404");
         }
+
         ModelAndView mv = new ModelAndView("learn");
+
         List<CourseSectionVO> chaptSections = this.courseBusiness.queryCourseSection(courseId);
+        mv.addObject("course",course);
+        mv.addObject("chaptSections",chaptSections);
 
-        mv.addObject("course", course);
-        mv.addObject("chaptSections", chaptSections);
-
-        AuthUser courseTeacher = this.authUserService.getByUsername(course.getUsername());
-        if (null != courseTeacher && StringUtils.isNotEmpty(courseTeacher.getHeader())) {
+        AuthUser courseTeacher = authUserService.getByUsername(course.getUsername());
+        if (null != courseTeacher && StringUtils.isNotEmpty(courseTeacher.getHeader())){
             courseTeacher.setHeader(QiniuStorage.getUrl(courseTeacher.getHeader()));
         }
-        mv.addObject("courseTeacher", courseTeacher);
+        mv.addObject("courseTeacher",courseTeacher);
 
-        CourseQueryDto queryEntity = new CourseQueryDto();
+        CourseQueryDto  queryEntity = new CourseQueryDto();
 
         queryEntity.descSortField("weight");
         queryEntity.setCount(5);
         queryEntity.setSubClassify(course.getSubClassify());
         List<Course> recomdCourseList = this.courseService.queryList(queryEntity);
-        mv.addObject("recomdCourseList", recomdCourseList);
+        mv.addObject("recomdCourseList",recomdCourseList);
+
 
         UserCourseSection userCourseSection = new UserCourseSection();
+
         userCourseSection.setCourseId(course.getId());
         userCourseSection.setUserId(SessionContext.getUserId());
         userCourseSection = this.userCourseSectionService.queryLatest(userCourseSection);
-        if (null != userCourseSection) {
 
+        if (null != userCourseSection){
             CourseSection curCourseSection = this.courseSectionService.getById(userCourseSection.getSectionId());
-            mv.addObject("curCourseSection", curCourseSection);
+
+            mv.addObject("curCourseSection",curCourseSection);
         }
+
         return mv;
+
     }
 
 
     @RequestMapping("/video/{sectionId}")
-    public ModelAndView video(@PathVariable Long sectionId) {
-        if (null == sectionId) {
+    public ModelAndView video(@PathVariable Long sectionId){
+
+        if (null == sectionId){
             return new ModelAndView("error/404");
         }
         CourseSection courseSection = courseSectionService.getById(sectionId);
-        if (null == courseSection) {
+        if (null == courseSection){
             return new ModelAndView("error/404");
         }
+
         ModelAndView mv = new ModelAndView("video");
         List<CourseSectionVO> chaptSections = this.courseBusiness.queryCourseSection(courseSection.getCourseId());
-
-        mv.addObject("courseSection", courseSection);
-        mv.addObject("chaptSections", chaptSections);
+        mv.addObject("courseSection",courseSection);
+        mv.addObject("chaptSections",chaptSections);
 
         UserCourseSection userCourseSection = new UserCourseSection();
-        userCourseSection.setCourseId(courseSection.getCourseId());
         userCourseSection.setUserId(SessionContext.getUserId());
+        userCourseSection.setCourseId(courseSection.getCourseId());
         userCourseSection.setSectionId(courseSection.getId());
+
         UserCourseSection result = userCourseSectionService.queryLatest(userCourseSection);
-        if (null == result) {
+
+
+        if (null == result){
             userCourseSection.setCreateTime(new Date());
             userCourseSection.setCreateUser(SessionContext.getUsername());
             userCourseSection.setUpdateTime(new Date());
             userCourseSection.setUpdateUser(SessionContext.getUsername());
 
             userCourseSectionService.createSelectivity(userCourseSection);
-        } else {
+        }else {
             result.setUpdateTime(new Date());
             userCourseSectionService.update(result);
         }
 
         return mv;
+
     }
 
-    @RequestMapping(value = "/getCurLearnInfo")
+
+    @RequestMapping(value = "/getCurLeanrnInfo")
     @ResponseBody
-    public String getCurLearnInfo() {
+    public String getCurLearnInfo(){
         JsonView jv = new JsonView();
-        if (SessionContext.isLogin()) {
+        if (SessionContext.isLogin()){
             UserCourseSection userCourseSection = new UserCourseSection();
             userCourseSection.setUserId(SessionContext.getUserId());
             userCourseSection = this.userCourseSectionService.queryLatest(userCourseSection);
-            if (null != userCourseSection) {
+            if (null != userCourseSection){
                 JSONObject jsObj = new JSONObject();
-                CourseSection curCourseSection = this.courseSectionService.getById(userCourseSection.getCourseId());
-                jsObj.put("curCourseSection", curCourseSection);
+                CourseSection curCourseSection = this.courseSectionService.getById(userCourseSection.getSectionId());
+                jsObj.put("curCourseSection",curCourseSection);
                 Course curCourse = courseService.getById(userCourseSection.getCourseId());
-                jsObj.put("curCourse", curCourse);
+                jsObj.put("curCourse",curCourse);
+
                 jv.setData(jsObj);
             }
-
         }
+
         return jv.toString();
     }
 
