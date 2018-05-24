@@ -15,7 +15,9 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by RookieWangZhiWei on 2018/5/5.
+ *
+ * @author RookieWangZhiWei
+ * @date 2018/5/24
  */
 @Controller
 @RequestMapping("/collections")
@@ -24,41 +26,50 @@ public class CollectionsController {
     @Autowired
     private IUserCollectionsService userCollectionsService;
 
+
     @RequestMapping(value = "/doCollection")
     @ResponseBody
     public String doCollection(Long courseId){
         Long curUserId = SessionContext.getUserId();
         UserCollections userCollections = new UserCollections();
 
+
         userCollections.setUserId(curUserId);
         userCollections.setClassify(CourseEnum.COLLECTION_CLASSIFY_COURSE.value());
         userCollections.setObjectId(courseId);
+
         List<UserCollections> list = userCollectionsService.queryAll(userCollections);
 
         if (CollectionUtils.isNotEmpty(list)){
             userCollectionsService.delete(list.get(0));
             return new JsonView(0).toString();
-        }else {
+        }else{
             userCollections.setCreateTime(new Date());
             userCollectionsService.createSelectivity(userCollections);
-            return new  JsonView(1).toString();
+            return new JsonView(1).toString();
         }
     }
+
 
     @RequestMapping(value = "/isCollection")
     @ResponseBody
     public String isCollection(Long courseId){
-        Long curUserId = SessionContext.getUserId();
+        Long curUserId =SessionContext.getUserId();
         UserCollections userCollections = new UserCollections();
+
         userCollections.setUserId(curUserId);
         userCollections.setClassify(CourseEnum.COLLECTION_CLASSIFY_COURSE.value());
         userCollections.setObjectId(courseId);
+
         List<UserCollections> list = userCollectionsService.queryAll(userCollections);
 
         if (CollectionUtils.isNotEmpty(list)){
             return new JsonView(1).toString();
-        }else {
+
+        }else{
+
             return new JsonView(0).toString();
         }
     }
+
 }

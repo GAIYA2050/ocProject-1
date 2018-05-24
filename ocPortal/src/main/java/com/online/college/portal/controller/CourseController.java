@@ -77,8 +77,8 @@ public class CourseController {
         }
         mv.addObject("courseTeacher",courseTeacher);
 
-        CourseQueryDto  queryEntity = new CourseQueryDto();
 
+        CourseQueryDto  queryEntity = new CourseQueryDto();
         queryEntity.descSortField("weight");
         queryEntity.setCount(5);
         queryEntity.setSubClassify(course.getSubClassify());
@@ -87,19 +87,15 @@ public class CourseController {
 
 
         UserCourseSection userCourseSection = new UserCourseSection();
-
         userCourseSection.setCourseId(course.getId());
         userCourseSection.setUserId(SessionContext.getUserId());
         userCourseSection = this.userCourseSectionService.queryLatest(userCourseSection);
 
         if (null != userCourseSection){
             CourseSection curCourseSection = this.courseSectionService.getById(userCourseSection.getSectionId());
-
             mv.addObject("curCourseSection",curCourseSection);
         }
-
         return mv;
-
     }
 
 
@@ -123,7 +119,6 @@ public class CourseController {
         userCourseSection.setUserId(SessionContext.getUserId());
         userCourseSection.setCourseId(courseSection.getCourseId());
         userCourseSection.setSectionId(courseSection.getId());
-
         UserCourseSection result = userCourseSectionService.queryLatest(userCourseSection);
 
 

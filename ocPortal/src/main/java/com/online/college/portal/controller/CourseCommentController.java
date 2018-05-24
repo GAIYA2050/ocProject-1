@@ -8,6 +8,8 @@ import com.online.college.core.course.domain.CourseComment;
 import com.online.college.core.course.domain.CourseSection;
 import com.online.college.core.course.service.ICourseCommentService;
 import com.online.college.core.course.service.ICourseSectionService;
+import com.qiniu.util.Json;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,7 +20,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 /**
- * Created by RookieWangZhiWei on 2018/5/5.
+ *
+ * @author RookieWangZhiWei
+ * @date 2018/5/24
  */
 @Controller
 @RequestMapping("/courseComment")
@@ -31,40 +35,47 @@ public class CourseCommentController {
     private ICourseSectionService courseSectionService;
 
 
-    @RequestMapping("/segment")
-    public ModelAndView segment(CourseComment queryEntity, TailPage<CourseComment> page) {
+
+    @RequestMapping(value = "/segment")
+    public ModelAndView segment(CourseComment queryEntity,TailPage<CourseComment> page) {
+
         if (null == queryEntity.getCourseId() || queryEntity.getType() == null) {
             return new ModelAndView("error/404");
         }
-        ModelAndView mv = new ModelAndView("commentsegment");
-        TailPage<CourseComment> commentPage = this.courseCommentService.queryPage(queryEntity, page);
 
+        ModelAndView mv = new ModelAndView("commentSegment");
+        TailPage<CourseComment> commentPage = this.courseCommentService.queryPage(queryEntity, page);
 
         for (CourseComment item :
                 commentPage.getItems()) {
-            item.setHeader(QiniuStorage.getUrl(item.getHeader()));
+            if (StringUtils.isNotEmpty(item.getHeader())) {
+                item.setHeader(QiniuStorage.getUrl(item.getHeader()));
+            }
         }
 
-        mv.addObject("page", commentPage);
+        mv.addObject("page",commentPage);
+
         return mv;
     }
 
 
+
+
+
     @RequestMapping(value = "/doComment")
     @ResponseBody
-    public String doComment(HttpServletRequest request, CourseComment entity, String indeityCode) {
-        if (null == indeityCode || (indeityCode != null && indeityCode.equalsIgnoreCase(SessionContext.getIdentifyCode(request)))) {
+    public String doComment(HttpServletRequest request, CourseComment entity, String indeityCode){
+        if (null == indeityCode || (indeityCode != null && indeityCode.equalsIgnoreCase(SessionContext.getIdentifyCode(request)))){
             return new JsonView(2).toString();
         }
-
-        if (entity.getContent().trim().length() > 200 || entity.getContent().trim().length() == 0) {
+        if (entity.getContent().trim().length() > 200 ||entity.getContent().trim().length()==0){
             return new JsonView(3).toString();
         }
-        if (null != entity.getRefId()) {
+        if (null != entity.getRefId()){
             CourseComment refComment = this.courseCommentService.getById(entity.getRefId());
-            if (null != refComment) {
+            if (null != refComment){
                 CourseSection courseSection = courseSectionService.getById(refComment.getSectionId());
-                if (null != courseSection) {
+                if(null != courseSection){
                     entity.setRefContent(refComment.getContent());
                     entity.setRefId(entity.getRefId());
                     entity.setCourseId(refComment.getCourseId());
@@ -78,14 +89,13 @@ public class CourseCommentController {
                     entity.setUpdateTime(new Date());
                     entity.setUpdateUser(SessionContext.getUsername());
 
-
                     this.courseCommentService.createSelectivity(entity);
                     return new JsonView(0).toString();
                 }
             }
-        } else {
+        }else{
             CourseSection courseSection = courseSectionService.getById(entity.getSectionId());
-            if (null != courseSection) {
+            if (null != courseSection){
                 entity.setSectionTitle(courseSection.getName());
                 entity.setToUsername(entity.getCreateUser());//toUsername可以作为页面入参
                 entity.setUsername(SessionContext.getUsername());
@@ -94,10 +104,13 @@ public class CourseCommentController {
                 entity.setUpdateTime(new Date());
                 entity.setUpdateUser(SessionContext.getUsername());
 
+
                 this.courseCommentService.createSelectivity(entity);
                 return new JsonView(0).toString();
             }
         }
+
         return new JsonView(1).toString();
     }
+
 }

@@ -14,18 +14,20 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by RookieWangZhiWei on 2018/5/5.
+ *
+ * @author RookieWangZhiWei
+ * @date 2018/5/24
  */
 @Controller
-@RequestMapping("follow")
-public class FollowerController {
+@RequestMapping("/follow")
+public class FollowController {
 
     @Autowired
     private IUserFollowsService userFollowsService;
 
     @RequestMapping(value = "/doFollow")
     @ResponseBody
-    public String doFollow(Long followId) {
+    public String doFollow(Long followId){
         Long curUserId = SessionContext.getUserId();
         UserFollows userFollows = new UserFollows();
 
@@ -33,32 +35,34 @@ public class FollowerController {
         userFollows.setFollowId(followId);
         List<UserFollows> list = userFollowsService.queryAll(userFollows);
 
-        if (CollectionUtils.isNotEmpty(list)) {
+        if (CollectionUtils.isNotEmpty(list)){
             userFollowsService.delete(list.get(0));
             return new JsonView(0).toString();
-        } else {
+        }else{
             userFollows.setCreateTime(new Date());
             userFollowsService.createSelectivity(userFollows);
             return new JsonView(1).toString();
         }
     }
 
+
     @RequestMapping(value = "/isFollow")
     @ResponseBody
-    public String isFollow(Long followId) {
+    public String isFollow(Long followId){
         Long curUserId = SessionContext.getUserId();
         UserFollows userFollows = new UserFollows();
 
         userFollows.setUserId(curUserId);
         userFollows.setFollowId(followId);
+
         List<UserFollows> list = userFollowsService.queryAll(userFollows);
-        if (CollectionUtils.isNotEmpty(list)) {
 
+        if (CollectionUtils.isNotEmpty(list)){
             return new JsonView(1).toString();
-        } else {
-
-
+        }else {
             return new JsonView(0).toString();
         }
+
     }
+
 }
