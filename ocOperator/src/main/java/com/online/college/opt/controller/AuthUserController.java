@@ -12,38 +12,43 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Created by RookieWangZhiWei on 2018/5/6.
+ *
+ * @author RookieWangZhiWei
+ * @date 2018/5/24
  */
 @Controller
 @RequestMapping("/user")
 public class AuthUserController {
+
+
     @Autowired
     private IAuthUserService authUserService;
 
     @RequestMapping(value = "/getById")
     @ResponseBody
-    public String getById(Long id) {
+    public String getById(Long id){
         AuthUser user = authUserService.getById(id);
         return JsonView.render(user);
     }
 
 
-    @RequestMapping(value = "/userPageList")
-    public ModelAndView queryPage(AuthUser queryEntity, TailPage<AuthUser> page) {
-        ModelAndView mv = new ModelAndView("cms/user/userPageList");
-        mv.addObject("curNav", "user");
 
-        if (StringUtils.isNotEmpty(queryEntity.getUsername())) {
+    @RequestMapping(value = "/userPageList")
+    public ModelAndView queryPage(AuthUser queryEntity, TailPage<AuthUser> page){
+        ModelAndView mv = new ModelAndView("cms/user/userPageList");
+        mv.addObject("curNav","user");
+
+
+        if (StringUtils.isNotEmpty(queryEntity.getUsername())){
             queryEntity.setUsername(queryEntity.getUsername().trim());
-        } else {
+        }else{
             queryEntity.setUsername(null);
         }
-        if (Integer.valueOf(-1).equals(queryEntity.getStatus())) {
-            queryEntity.setStatus(null);
-        }
+
         page = authUserService.queryPage(queryEntity, page);
-        mv.addObject("page", page);
-        mv.addObject("queryEntity", queryEntity);
+        mv.addObject("page",page);
+        mv.addObject("queryEntity",queryEntity);
+
         return mv;
 
     }
@@ -51,12 +56,10 @@ public class AuthUserController {
 
     @RequestMapping(value = "/doMerge")
     @ResponseBody
-    public String doMerge(AuthUser entity) {
+    public String doMerge(AuthUser entity){
         entity.setUsername(null);
-        entity.setRealname(null);
+        entity.setPassword(null);
         authUserService.updateSelectivity(entity);
         return new JsonView(0).toString();
     }
-
-
 }

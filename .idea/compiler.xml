@@ -13,11 +13,11 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="ocCommon" target="1.7" />
-      <module name="ocOperator" target="1.7" />
-      <module name="ocPortal" target="1.7" />
-      <module name="ocProject" target="1.7" />
-      <module name="ocService" target="1.7" />
+      <module name="ocCommon" target="1.8" />
+      <module name="ocOperator" target="1.8" />
+      <module name="ocPortal" target="1.8" />
+      <module name="ocProject" target="1.8" />
+      <module name="ocService" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

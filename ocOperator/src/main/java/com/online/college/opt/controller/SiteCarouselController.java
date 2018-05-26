@@ -18,71 +18,71 @@ import org.springframework.web.servlet.ModelAndView;
 import java.io.IOException;
 
 /**
- * Created by RookieWangZhiWei on 2018/5/6.
+ *
+ * @author RookieWangZhiWei
+ * @date 2018/5/26
  */
 @Controller
-@RequestMapping("/carousel")
+@RequestMapping(value = "/carousel")
 public class SiteCarouselController {
-
     @Autowired
     private IConstsSiteCarouselService constsSiteCarouselService;
 
     @RequestMapping(value = "/queryPage")
-    public ModelAndView queryPage(ConstsSiteCarousel queryEntity, TailPage<ConstsSiteCarousel> page) {
-
-        ModelAndView mv = new ModelAndView("cms/carousel/pageList");
-        mv.addObject("curNav", "carousel");
+    public ModelAndView queryPage(ConstsSiteCarousel queryEntity, TailPage<ConstsSiteCarousel> page){
+        ModelAndView mv = new ModelAndView("cms/carousel/pagelist");
+        mv.addObject("curNav","carousel");
         page.setPageSize(5);
         page = constsSiteCarouselService.queryPage(queryEntity, page);
-        mv.addObject("page", page);
-        mv.addObject("queryEntity", queryEntity);
+        mv.addObject("page",page);
+        mv.addObject("queryEntity",queryEntity);
         return mv;
-
     }
 
-    @RequestMapping(value = "/toMerge")
-    public ModelAndView toMerge(ConstsSiteCarousel entity) {
+
+   @RequestMapping(value = "/toMerge")
+   public ModelAndView toMerge(ConstsSiteCarousel entity){
         ModelAndView mv = new ModelAndView("cms/carousel/merge");
-        mv.addObject("curNav", "carousel");
-        if (entity.getId() != null) {
-            entity = constsSiteCarouselService.getById(entity.getId());
-            if (null != entity && StringUtils.isNotEmpty(entity.getPicture())) {
+        mv.addObject("curNav","carousel");
+
+        if (entity.getId() != null){
+            entity =constsSiteCarouselService.getById(entity.getId());
+            if (null != entity && StringUtils.isNotEmpty(entity.getPicture())){
                 String pictureUrl = QiniuStorage.getUrl(entity.getPicture(), ThumbModel.THUMB_128);
                 entity.setPicture(pictureUrl);
             }
         }
-        mv.addObject("entity", entity);
-
+        mv.addObject("entity",entity);
         return mv;
-    }
+   }
 
+   @RequestMapping(value = "/doMerge")
+    public ModelAndView doMerge(ConstsSiteCarousel entity, @RequestParam MultipartFile pictureImg ){
+       String key = null;
+       try{
+           if (null != pictureImg && pictureImg.getBytes().length>0){
+               key = QiniuStorage.uploadImage(pictureImg.getBytes());
+               entity.setPicture(key);
+           }
+       }catch (IOException e){
+           e.printStackTrace();
+       }
 
-    @RequestMapping(value = "/doMerge")
-    public ModelAndView deMerge(ConstsSiteCarousel entity, @RequestParam MultipartFile pictureImg) {
-        String key = null;
-        try {
-            if (null != pictureImg && pictureImg.getBytes().length > 0) {
-                key = QiniuStorage.uploadImage(pictureImg.getBytes());
-                entity.setPicture(key);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+       if (entity.getId() == null){
+           constsSiteCarouselService.createSelectivity(entity);
+       }else{
+           constsSiteCarouselService.updateSelectivity(entity);
+       }
 
-        if (entity.getId() == null) {
-            constsSiteCarouselService.createSelectivity(entity);
-        } else {
-            constsSiteCarouselService.updateSelectivity(entity);
-        }
+       return new ModelAndView("redirect:/carousel/queryPage.html");
+   }
 
-        return new ModelAndView("redirect:/carousel/queryPage.html");
-    }
 
     @RequestMapping(value = "/delete")
     @ResponseBody
-    public String delete(ConstsSiteCarousel entity) {
+    public String delete(ConstsSiteCarousel entity){
         constsSiteCarouselService.delete(entity);
-
         return new JsonView().toString();
     }
+
 }

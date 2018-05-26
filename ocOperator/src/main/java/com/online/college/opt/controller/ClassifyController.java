@@ -17,13 +17,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by RookieWangZhiWei on 2018/5/6.
+ *
+ * @author RookieWangZhiWei
+ * @date 2018/5/24
  */
 @Controller
-@RequestMapping
+@RequestMapping("/classify")
 public class ClassifyController {
+
+
     @Autowired
-    private IConstsClassifyService constsClassifyService;
+    private IConstsClassifyService ConstsClassifyService;
 
     @Autowired
     private IPortalBusiness portalBusiness;
@@ -31,59 +35,58 @@ public class ClassifyController {
 
     @RequestMapping(value = "/getById")
     @ResponseBody
-    public String getById(Long id) {
-        return JsonView.render(constsClassifyService.getById(id));
+    public String getById(Long id){
+        return JsonView.render(ConstsClassifyService.getById(id));
     }
 
 
-    @RequestMapping(value = "/index")
-    public ModelAndView classifyIndex(ConstsClassify queryEntity, TailPage<ConstsClassify> page) {
-
+    @RequestMapping("/index")
+    public ModelAndView classifyIndex(ConstsClassify queryEntity, TailPage<ConstsClassify> page){
         ModelAndView mv = new ModelAndView("cms/classify/classifyIndex");
-        mv.addObject("curNav", "classify");
+        mv.addObject("curNav","classify");
 
-        Map<String, ConstsClassifyVO> classifyMap = portalBusiness.queryAllClassifyMap();
+        Map<String,ConstsClassifyVO> classifyMap = portalBusiness.queryAllClassifyMap();
 
-        List<ConstsClassifyVO> classifysList = new ArrayList<ConstsClassifyVO>();
-
+        List<ConstsClassifyVO> classifyList = new ArrayList<>();
         for (ConstsClassifyVO vo :
                 classifyMap.values()) {
-            classifysList.add(vo);
+            classifyList.add(vo);
         }
-        mv.addObject("classifys", classifysList);
+        mv.addObject("classifys",classifyList);
 
-        ArrayList<ConstsClassify> subClassifys = new ArrayList<>();
+        List<ConstsClassify> subClassifys = new ArrayList<>();
+
         for (ConstsClassifyVO vo :
                 classifyMap.values()) {
             subClassifys.addAll(vo.getSubClassifyList());
         }
-
-        mv.addObject("subClassifys", subClassifys);
+        mv.addObject("subClassifys",subClassifys);
 
         return mv;
+
     }
 
     @RequestMapping(value = "/doMerge")
     @ResponseBody
-    public String doMerge(ConstsClassify entity) {
-        if (entity.getId() == null) {
-            ConstsClassify tmpEntity = constsClassifyService.getByCode(entity.getCode());
-            if (tmpEntity != null) {
-                return JsonView.render(1, "此编码已存在");
+    public String doMerge(ConstsClassify entity){
+        if (entity.getId() == null){
+            ConstsClassify tmpEntity = ConstsClassifyService.getByCode(entity.getCode());
+            if (tmpEntity != null){
+                return JsonView.render(1,"此编码已存在");
             }
-            constsClassifyService.createSelectivity(entity);
-        } else {
-            constsClassifyService.updateSelectivity(entity);
+            ConstsClassifyService.createSelectivity(entity);
+        }else{
+            ConstsClassifyService.updateSelectivity(entity);
         }
-        return new JsonView().toString();
+
+        return new JsonView(0).toString();
     }
 
 
     @RequestMapping(value = "/deleteLogic")
     @ResponseBody
-    public String deleteLogic(ConstsClassify entity) {
-        constsClassifyService.deleteLogic(entity);
+    public String deleteLogic(ConstsClassify entity){
+        ConstsClassifyService.deleteLogic(entity);
         return new JsonView().toString();
     }
-
 }
