@@ -10,4 +10,4 @@
 - [x] 七牛云存储
 
 
-![Image text](https://github.com/RookieWZW/ocProject/blob/master/doc/%E7%BD%91%E7%AB%99%E7%BB%93%E6%9E%84.jpg)
+![Image text](https://github.com/RookieWZW/ocProject/blob/master/doc/%E6%9C%AA%E5%91%BD%E5%90%8D%E6%96%87%E4%BB%B6.png)
