@@ -10,7 +10,6 @@
         <module name="ocOperator" />
         <module name="ocPortal" />
         <module name="ocService" />
-        <module name="ocWechat" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

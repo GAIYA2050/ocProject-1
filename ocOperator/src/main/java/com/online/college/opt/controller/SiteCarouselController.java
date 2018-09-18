@@ -17,11 +17,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
 
-/**
- *
- * @author RookieWangZhiWei
- * @date 2018/5/26
- */
 @Controller
 @RequestMapping(value = "/carousel")
 public class SiteCarouselController {

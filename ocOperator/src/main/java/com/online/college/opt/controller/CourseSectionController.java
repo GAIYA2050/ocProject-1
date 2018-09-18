@@ -17,9 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-/**
- * Created by RookieWangZhiWei on 2018/5/26.
- */
+
 @Controller
 @RequestMapping(value = "/courseSection")
 public class CourseSectionController {

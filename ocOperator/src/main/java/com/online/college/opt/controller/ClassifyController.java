@@ -16,11 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- * @author RookieWangZhiWei
- * @date 2018/5/24
- */
 @Controller
 @RequestMapping("/classify")
 public class ClassifyController {

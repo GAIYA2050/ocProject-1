@@ -17,11 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 
-/**
- *
- * @author RookieWangZhiWei
- * @date 2018/5/22
- */
+
 @Controller
 @RequestMapping("/auth")
 public class AuthController {

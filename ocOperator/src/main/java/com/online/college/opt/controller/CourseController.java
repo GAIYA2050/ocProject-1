@@ -35,10 +35,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author RookieWangZhiWei
- * @date 2018/5/26
- */
+
 
 @Controller
 @RequestMapping(value = "/course")

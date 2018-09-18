@@ -14,11 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-/**
- *
- * @author RookieWangZhiWei
- * @date 2018/5/26
- */
+
 @Controller
 @RequestMapping(value = "/courseComment")
 public class CourseCommentController {

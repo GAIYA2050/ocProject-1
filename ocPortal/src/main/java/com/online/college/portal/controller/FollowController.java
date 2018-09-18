@@ -13,11 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.Date;
 import java.util.List;
 
-/**
- *
- * @author RookieWangZhiWei
- * @date 2018/5/24
- */
+
 @Controller
 @RequestMapping("/follow")
 public class FollowController {

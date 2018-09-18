@@ -17,11 +17,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
 
-/**
- *
- * @author RookieWangZhiWei
- * @date 2018/5/23
- */
 @Controller
 @RequestMapping()
 public class PortalController {

@@ -26,11 +26,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.util.Date;
 import java.util.List;
 
-/**
- *
- * @author RookieWangZhiWei
- * @date 2018/5/23
- */
+
 @Controller
 @RequestMapping("/course")
 public class CourseController {

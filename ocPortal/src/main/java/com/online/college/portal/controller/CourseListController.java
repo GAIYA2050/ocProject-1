@@ -17,11 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- * @author RookieWangZhiWei
- * @date 2018/5/23
- */
+
 @Controller
 @RequestMapping("/course")
 public class CourseListController {

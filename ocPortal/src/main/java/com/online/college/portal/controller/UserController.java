@@ -29,11 +29,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
 
-/**
- *
- * @author RookieWangZhiWei
- * @date 2018/5/24
- */
+
 @Controller
 @RequestMapping("/user")
 public class UserController {
